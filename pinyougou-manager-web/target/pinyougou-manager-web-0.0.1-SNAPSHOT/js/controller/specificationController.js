@@ -77,7 +77,7 @@ app.controller('specificationController' ,function($scope,$controller,specificat
 		);
 	}
 	
-	$scope.entity={specification:{},specificationOptionList:[]};
+	$scope.entity={specificationOptionList:[]};
 	
 	
 	//$scope.specificationOptionList=[];

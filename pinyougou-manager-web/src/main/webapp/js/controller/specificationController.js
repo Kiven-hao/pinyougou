@@ -77,7 +77,7 @@ app.controller('specificationController' ,function($scope,$controller,specificat
 		);
 	}
 	
-	//$scope.entity={specification:{},specificationOptionList:[]};
+	$scope.entity={specificationOptionList:[]};
 	
 	
 	//$scope.specificationOptionList=[];
@@ -87,7 +87,7 @@ app.controller('specificationController' ,function($scope,$controller,specificat
 	}
 	
 	//删除规格选项行
-	$scope.deleTableRow=function(){
+	$scope.deleTableRow=function(index){
 		$scope.entity.specificationOptionList.splice(index,1);
 	}
     
