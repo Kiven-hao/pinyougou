@@ -3,6 +3,7 @@ import java.util.List;
 import com.pinyougou.pojo.TbGoods;
 
 import entity.PageResult;
+import pojogroup.Goods;
 /**
  * 服务层接口
  * @author Administrator
@@ -58,4 +59,12 @@ public interface GoodsService {
 	 */
 	public PageResult findPage(TbGoods goods, int pageNum,int pageSize);
 	
+	
+	
+	/**
+	 * 添加商品及商品描述
+	 * @param goods
+	 * @return
+	 */
+	public void add(Goods goods);
 }

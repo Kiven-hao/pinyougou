@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.pinyougou.mapper.TbGoodsDescMapper;
 import com.pinyougou.mapper.TbGoodsMapper;
 import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.pojo.TbGoodsExample;
 import com.pinyougou.pojo.TbGoodsExample.Criteria;
 import com.pinyougou.sellergoods.service.GoodsService;
-
 import entity.PageResult;
+import pojogroup.Goods;
 
 /**
  * 服务实现层
@@ -22,6 +23,8 @@ public class GoodsServiceImpl implements GoodsService {
 
 	@Autowired
 	private TbGoodsMapper goodsMapper;
+	
+	private TbGoodsDescMapper goodsDescMapper;
 	
 	/**
 	 * 查询全部
@@ -117,5 +120,17 @@ public class GoodsServiceImpl implements GoodsService {
 		Page<TbGoods> page= (Page<TbGoods>)goodsMapper.selectByExample(example);		
 		return new PageResult(page.getTotal(), page.getResult());
 	}
+		
+		@Override
+		public void add(Goods goods) {
+			// TODO Auto-generated method stub
+			goods.getGoods().setAuditStatus("0");//设置商品的状态,0代表未审核
+			goodsMapper.insert(goods.getGoods());
+			System.out.println(goods.getGoodsDesc().toString());
+			System.out.println(goods.getGoods().getId());
+			goods.getGoodsDesc().setGoodsId(goods.getGoods().getId());//在GoodDesc表设置ID
+			System.out.println(goods.getGoodsDesc());
+			//goodsDescMapper.insert(goods.getGoodsDesc());
+		}
 	
 }

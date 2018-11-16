@@ -1,5 +1,5 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller   ,goodsService){	
+app.controller('goodsController' ,function($scope,$controller,goodsService){	
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
@@ -75,6 +75,18 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService){
 				$scope.paginationConf.totalItems=response.total;//更新总记录数
 			}			
 		);
+	}
+	$scope.add=function(){
+		goodsService.add($scope.entity).success(
+				function(response){
+					if(response.success) {
+						alert("保存成功");
+						$scope.entity={};
+					}else{
+						alert(response.message);
+					}
+				}
+			);
 	}
     
 });	
