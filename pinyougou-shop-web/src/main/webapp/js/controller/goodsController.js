@@ -1,5 +1,5 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller,goodsService,itemCatService,uploadService){	
+app.controller('goodsController' ,function($scope,$controller,goodsService,uploadService){	
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
@@ -91,26 +91,26 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,itemC
 			);
 	}
 	$scope.uploadFile=function(){
-		uploadService.uploadFile().success(function(response){
-			if(response.usccess){
-				$scope.image_entity.url=response.message;
-			}else{
-				alert(response.message);
-			}
-		}).error(function(){
-			alert("上传错误");
-		});
+		uploadService.uploadFile().success(
+			function(response){
+				if(response.success){
+					$scope.image_entity.url= response.message;
+				}else{
+					alert(response.message);					
+				}
+			}		
+		);
 	}
 	
 	
 	$scope.entity={goods:{},goodsDesc:{itemImages:[]}};//定义页面实体结构
 	//添加图片列表
 	$scope.add_image_entity=function(){
-		$scope.entity.goodsDesc.itemImages.push($scope.image_entity);
+		$scope.entity.goodsDesc.itemImages.push($scope.image_entity);			
 	}
 	
 	$scope.remove_image_entity=function(index){
-		$scope.entity.goodDesc.itemImages.splice(index,1);
+		$scope.entity.goodsDesc.itemImages.splice(index,1);
 	}
     
 });	
