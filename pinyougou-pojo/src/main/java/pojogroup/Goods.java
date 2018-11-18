@@ -11,6 +11,7 @@ public class Goods implements Serializable{
 	private TbGoods goods;
 	private TbGoodsDesc goodsDesc;
 	private List<TbItem> items;
+	
 	public TbGoods getGoods() {
 		return goods;
 	}

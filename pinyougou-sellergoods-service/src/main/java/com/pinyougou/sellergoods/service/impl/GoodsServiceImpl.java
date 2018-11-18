@@ -1,15 +1,29 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.pinyougou.mapper.TbBrandMapper;
 import com.pinyougou.mapper.TbGoodsDescMapper;
 import com.pinyougou.mapper.TbGoodsMapper;
+import com.pinyougou.mapper.TbItemCatMapper;
+import com.pinyougou.mapper.TbItemMapper;
+import com.pinyougou.mapper.TbSellerMapper;
+import com.pinyougou.pojo.TbBrand;
 import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.pojo.TbGoodsExample;
 import com.pinyougou.pojo.TbGoodsExample.Criteria;
+import com.pinyougou.pojo.TbItem;
+import com.pinyougou.pojo.TbItemCat;
+import com.pinyougou.pojo.TbSeller;
 import com.pinyougou.sellergoods.service.GoodsService;
+
 import entity.PageResult;
 import pojogroup.Goods;
 
@@ -23,8 +37,16 @@ public class GoodsServiceImpl implements GoodsService {
 
 	@Autowired
 	private TbGoodsMapper goodsMapper;
-	
+	@Autowired
 	private TbGoodsDescMapper goodsDescMapper;
+	@Autowired
+	private TbItemMapper itemMapper;
+	@Autowired
+	private TbBrandMapper brandMapper;
+	@Autowired
+	private TbItemCatMapper itemCatMapper;
+	@Autowired
+	private TbSellerMapper sellerMapper;
 	
 	/**
 	 * 查询全部
@@ -121,16 +143,70 @@ public class GoodsServiceImpl implements GoodsService {
 		return new PageResult(page.getTotal(), page.getResult());
 	}
 		
+		
 		@Override
 		public void add(Goods goods) {
-			// TODO Auto-generated method stub
-			goods.getGoods().setAuditStatus("0");//设置商品的状态,0代表未审核
-			goodsMapper.insert(goods.getGoods());
-			System.out.println(goods.getGoodsDesc().toString());
-			System.out.println(goods.getGoods().getId());
-			goods.getGoodsDesc().setGoodsId(goods.getGoods().getId());//在GoodDesc表设置ID
-			System.out.println(goods.getGoodsDesc());
-			//goodsDescMapper.insert(goods.getGoodsDesc());
+			
+			goods.getGoods().setAuditStatus("0");//状态：未审核
+			goodsMapper.insert(goods.getGoods());//插入商品基本信息
+			
+			goods.getGoodsDesc().setGoodsId(goods.getGoods().getId());//将商品基本表的ID给商品扩展表
+			goodsDescMapper.insert(goods.getGoodsDesc());//插入商品扩展表数据
+			
+			if("1".equals(goods.getGoods().getIsEnableSpec())){
+				for(TbItem item:   goods.getItems()){
+					//构建标题  SPU名称+ 规格选项值
+					String title=goods.getGoods().getGoodsName();//SPU名称
+					Map<String,Object> map=  JSON.parseObject(item.getSpec());
+					for(String key:map.keySet()) {
+						title+=" "+map.get(key);
+					}
+					item.setTitle(title);
+					
+					setItemValues(item,goods);
+					
+					itemMapper.insert(item);
+				}
+			}else{//没有启用规格			
+				
+				TbItem item=new TbItem();
+				item.setTitle(goods.getGoods().getGoodsName());//标题
+				item.setPrice(goods.getGoods().getPrice());//价格
+				item.setNum(99999);//库存数量
+				item.setStatus("1");//状态
+				item.setIsDefault("1");//默认
+				item.setSpec("{}");//规格
+				
+				setItemValues(item,goods);
+				
+				itemMapper.insert(item);
+			}
+		}
+		private void setItemValues(TbItem item,Goods goods){
+			//商品分类 
+			item.setCategoryid(goods.getGoods().getCategory3Id());//三级分类ID
+			item.setCreateTime(new Date());//创建日期
+			item.setUpdateTime(new Date());//更新日期 
+			
+			item.setGoodsId(goods.getGoods().getId());//商品ID
+			item.setSellerId(goods.getGoods().getSellerId());//商家ID
+			
+			//分类名称			
+			TbItemCat itemCat = itemCatMapper.selectByPrimaryKey(goods.getGoods().getCategory3Id());
+			item.setCategory(itemCat.getName());
+			//品牌名称
+			TbBrand brand = brandMapper.selectByPrimaryKey(goods.getGoods().getBrandId());
+			item.setBrand(brand.getName());
+			//商家名称(店铺名称)			
+			TbSeller seller = sellerMapper.selectByPrimaryKey(goods.getGoods().getSellerId());
+			item.setSeller(seller.getNickName());
+			
+			//图片
+			List<Map> imageList = JSON.parseArray( goods.getGoodsDesc().getItemImages(), Map.class) ;
+			if(imageList.size()>0){
+				item.setImage( (String)imageList.get(0).get("url"));
+			}
+			
 		}
 	
 }
