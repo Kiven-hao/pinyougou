@@ -1,5 +1,5 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller   ,goodsService){	
+app.controller('goodsController' ,function($scope,$controller   ,goodsService,itemCatService){	
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
@@ -76,5 +76,9 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService){
 			}			
 		);
 	}
+	
+	$scope.status=['未审核','已审核','审核未通过','关闭'];
+	$scope.itemCatList=[];//商品分类列表
+	
     
 });	

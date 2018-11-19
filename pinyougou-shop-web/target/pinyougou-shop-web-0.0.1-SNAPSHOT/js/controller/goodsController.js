@@ -1,8 +1,22 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller,goodsService,uploadService,itemCatService,typeTemplateService){	
+app.controller('goodsController' ,function($scope,$controller,$location,goodsService,uploadService,itemCatService,typeTemplateService){	
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
+	$scope.itemCatList=[];//商品分类列表
+	//查询出所有的商品分类
+	$scope.findItemCatList=function(){
+		itemCatService.findAll().success(
+			function(response){
+				for(var i=0;i<response.length;i++) {
+					$scope.itemCatList[response[i].id]=response[i].name;
+				}
+			}
+		);
+	}
+	
+	//设置商品状态数组
+	$scope.status=['未审核','已审核','审核未通过','关闭'];
     //读取列表数据绑定到表单中  
 	$scope.findAll=function(){
 		goodsService.findAll().success(
@@ -23,12 +37,44 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,uploa
 	}
 	
 	//查询实体 
-	$scope.findOne=function(id){				
+	$scope.findOne=function(){
+		var id= $location.search()['id'];//获取参数值
+		if(id==null){
+			return ;
+		}
 		goodsService.findOne(id).success(
-			function(response){
-				$scope.entity= response;					
+				function(response){
+					$scope.entity= response;
+					
+					editor.html($scope.entity.goodsDesc.introduction );//商品介绍 
+					//商品图片
+					$scope.entity.goodsDesc.itemImages=JSON.parse($scope.entity.goodsDesc.itemImages);
+					//扩展属性
+					if($location.search()['id']==null){
+					$scope.entity.goodsDesc.customAttributeItems=JSON.parse($scope.entity.goodsDesc.customAttributeItems);
+				}
+					//规格选择
+					$scope.entity.goodsDesc.specificationItems= JSON.parse($scope.entity.goodsDesc.specificationItems);
+					for(var i=0;i< $scope.entity.itemList.length;i++ ){
+						$scope.entity.itemList[i].spec=  JSON.parse($scope.entity.itemList[i].spec);					
+					}
 			}
 		);				
+	}
+	
+	//根据规格名称和选项名称判断是否是勾选
+	$scope.checkAttributeValue=function(specName,optionName){
+		var items= $scope.entity.goodsDesc.specificationItems;
+		var object=$scope.searchObjectByKey(items,'attributeName',specName);
+		if(object==null) {
+			return false;
+		}else{
+			if(object.attributeValue.indexOf(optionName)>=0) {
+				return true;
+			}else{
+				return false;
+			}
+		}
 	}
 	
 	//保存 
@@ -153,13 +199,57 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,uploa
 				$scope.entity.goodsDesc.customAttributeItems= JSON.parse($scope.typeTemplate.customAttributeItems);
 			}
 		);
-		//读取规格
-		/*typeTemplateService.findSpecList(newValue).success(
+		//读取规格列表
+		typeTemplateService.findSpecList(newValue).success(
 			function(response){
 				$scope.specList=response;
 			}
-		);*/		
+		);		
 		
 	});
+	
+	$scope.entity={ goodsDesc:{itemImages:[],specificationItems:[]}};
+	$scope.updateSpecAttribute=function($event,name,value){
+		var object= $scope.searchObjectByKey(
+			$scope.entity.goodsDesc.specificationItems ,'attributeName', name);
+		if(object!=null) {
+			if($event.target.checked ){
+				object.attributeValue.push(value);//勾选
+		}else{
+				object.attributeValue.splice( object.attributeValue.indexOf(value) ,1);//取消勾选
+				if(object.attributeValue.length==0){
+					$scope.entity.goodsDesc.specificationItems.splice(
+							$scope.entity.goodsDesc.specificationItems.indexOf(object),1);
+				}
+			}
+		}else{
+			$scope.entity.goodsDesc.specificationItems.push(
+					{"attributeName":name,"attributeValue":[value]});
+		}
+		
+	}
+	
+	//创建SKU表
+	$scope.createItemList=function(){
+		$scope.entity.itemList=[{spec:{},price:0,status:'0',num:9999,idDefault:'0'}]//创建初始化表
+		var items= $scope.entity.goodsDesc.specificationItems;
+		for(var i=0;i<items.length;i++) {
+			$scope.entity.itemList=addColumn( $scope.entity.itemList,items[i].attributeName,items[i].attributeValue );
+		}
+	}
+     addColumn=function(list,columnName,columnValues){
+		
+		var newList=[];		
+		for(var i=0;i< list.length;i++){
+			var oldRow=list[i];			
+			for(var j=0;j<columnValues.length;j++){
+				var newRow=JSON.parse(JSON.stringify(oldRow));//深克隆
+				newRow.spec[columnName]=columnValues[j];
+				newList.push(newRow);
+			}			
+		}		
+		return newList;
+	}
+	
     
 });	

@@ -51,7 +51,7 @@ public class SellerController {
 		try {
 			sellerService.add(seller);
 			return new Result(true, "增加成功");
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 			return new Result(false, "增加失败");
 		}
@@ -93,7 +93,7 @@ public class SellerController {
 		try {
 			sellerService.delete(ids);
 			return new Result(true, "删除成功"); 
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 			return new Result(false, "删除失败");
 		}
