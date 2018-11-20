@@ -79,6 +79,29 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService,it
 	
 	$scope.status=['未审核','已审核','审核未通过','关闭'];
 	$scope.itemCatList=[];//商品分类列表
+	$scope.findItemCatList=function(){
+		itemCatService.findAll().success(
+			function(response){
+				for(var i=0;i<response.length;i++){
+					$scope.itemCatList[response[i].id ]=response[i].name;
+				}
+			}
+		)
+	}
 	
+	//商品审核
+	$scope.updateStatus=function(status){
+		goodsService.updateStatus($scope.selectIds,status).success(
+			function(response){
+				if(response.success) {
+					$scope.reloadList();//刷新列表
+					$scope.selectIds=[];//完成之后清空集合
+				}else{
+					alert(response.message);
+				}
+			}
+		)
+	}
+
     
 });	

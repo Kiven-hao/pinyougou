@@ -51,8 +51,8 @@ app.controller('goodsController' ,function($scope,$controller,$location,goodsSer
 					$scope.entity.goodsDesc.itemImages=JSON.parse($scope.entity.goodsDesc.itemImages);
 					//扩展属性
 					if($location.search()['id']==null){
-					$scope.entity.goodsDesc.customAttributeItems=JSON.parse($scope.entity.goodsDesc.customAttributeItems);
-				}
+						$scope.entity.goodsDesc.customAttributeItems =JSON.parse($scope.typeTemplate.customAttributeItems);
+					}
 					//规格选择
 					$scope.entity.goodsDesc.specificationItems= JSON.parse($scope.entity.goodsDesc.specificationItems);
 					for(var i=0;i< $scope.entity.itemList.length;i++ ){
@@ -78,7 +78,8 @@ app.controller('goodsController' ,function($scope,$controller,$location,goodsSer
 	}
 	
 	//保存 
-	$scope.save=function(){				
+	$scope.save=function(){		
+		$scope.entity.goodsDesc.introduction=editor.html();
 		var serviceObject;//服务层对象  				
 		if($scope.entity.id!=null){//如果有ID
 			serviceObject=goodsService.update( $scope.entity ); //修改  
@@ -88,8 +89,13 @@ app.controller('goodsController' ,function($scope,$controller,$location,goodsSer
 		serviceObject.success(
 			function(response){
 				if(response.success){
+					
+					alert('保存成功');
+					entity.entity={};
+					entity.html("");
+					
+					location.href="goods.html";//保存成功之后跳转到商品列表界面
 					//重新查询 
-		        	$scope.reloadList();//重新加载
 				}else{
 					alert(response.message);
 				}
