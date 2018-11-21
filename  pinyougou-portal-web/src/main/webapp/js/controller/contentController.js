@@ -1,0 +1,13 @@
+//广告的后台
+app.controller("contentController",function($scope,contentService){
+	$scope.contentList=[];//初始化一个空的广告集合
+	//根据广告id查询广告列表
+	$scope.findByCategoryId=function(categoryId){
+		contentService.findByCategoryId(categoryId).success(
+			function(response){
+				//alert(response.length);
+				$scope.contentList[categoryId]=response;
+			}
+		);
+	}
+});
