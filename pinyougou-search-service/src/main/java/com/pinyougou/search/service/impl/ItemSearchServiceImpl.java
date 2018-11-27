@@ -21,12 +21,14 @@ public class ItemSearchServiceImpl implements ItemSearchService{
 	public Map<String, Object> search(Map searchMap) {
 		Map<String,Object> map=new HashMap<>();
 		Query query=new SimpleQuery();
+		System.out.println(searchMap.get("keywords"));
 		//添加查询条件
 		Criteria criteria =new Criteria("item_keywords").is(searchMap.get("keywords"));
 		query.addCriteria(criteria);
 		ScoredPage<TbItem> page=solrTemplate.queryForPage(query, TbItem.class);
 		map.put("rows", page.getContent());
 		// TODO Auto-generated method stub
+		System.out.println(map);
 		return map;
 	}
 }
